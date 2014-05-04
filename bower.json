@@ -1,0 +1,19 @@
+{
+  "name": "columnimate",
+  "main": "columnimate.js",
+  "version": "0.0.1",
+  "authors": [
+    "Miguel Mota <miguelmota2@gmail.com>"
+  ],
+  "description": "Simple column sliding animation",
+  "moduleType": [
+    "node"
+  ],
+  "keywords": [
+    "columns",
+    "sliding",
+    "animation"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/miguelmota/columnimate"
+}

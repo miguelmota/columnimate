@@ -1,0 +1,84 @@
+* {
+    margin: 0;
+    padding: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+}
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+body {
+    font-family: sans-serif;
+}
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.column-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+.column {
+    width: 50%;
+    height: 100%;
+}
+.column-left {
+    float: left;
+/*    background: transparent url(http://static.neatorama.com/images/2007-07/eiffel-tower-day.jpg) no-repeat center center;*/
+}
+.column-right {
+    float: right;
+}
+.box {
+    width: 100%;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+.column-left .box {
+    background-position: right center;
+}
+.column-left .box-two {
+    background-image: url(./images/3-left.png);
+}
+.column-left .box-one {
+    background-image: url(./images/2-left.png);
+}
+.column-left .box-three {
+    background-image: url(./images/1-left.png);
+}
+.column-right .box-one {
+    background-image: url(./images/2-right.png);
+}
+.column-right .box-two {
+    background-image: url(./images/3-right.png);
+}
+.column-right .box-three {
+    background-image: url(./images/1-right.png);
+}
+.column-right .box {
+    background-position: left center;
+}
+.button {
+    background: rgba(0,0,0,.5);
+    color: #fff;
+    padding: 5px 20px;
+}
+.next {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    cursor: pointer;
+}
+.prev {
+    position: absolute;
+    bottom: 10px;
+    left: 40%;
+    cursor: pointer;
+}
