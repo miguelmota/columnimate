@@ -1,5 +1,9 @@
-Columnimate = function(opts) {
+Columnimate = (function(opts) {
+    'use strict';
+
     opts = opts || {};
+
+    /* Defaults */
 
     var defaults = {
         container: '.columnimate-container',
@@ -13,6 +17,29 @@ Columnimate = function(opts) {
         animate: 'blur',
         transition: 2000
     };
+
+    /* Elements */
+
+    var body = document.body;
+    var container = element(opts.container)[0];
+    var sections = element(opts.sections);
+    var section = sections[0];
+    var columns = {
+        left: element(opts.columns.left)[0],
+        right: element(opts.columns.right)[0]
+    };
+    var next = element(opts.next)[0];
+    var prev = element(opts.prev)[0];
+    var invertedColumn = 'left';
+    var sectionCount = size(columns[invertedColumn].querySelectorAll(opts.sections));
+    var timer;
+
+    var SCROLL_DIRECTION = null;
+    var IS_ANIMATING = false;
+
+    opts = merge(defaults, opts);
+
+    /* Functions */
 
     function merge(obj1, obj2){
         var obj3 = {},
@@ -90,39 +117,15 @@ Columnimate = function(opts) {
         return window.getComputedStyle(el).getPropertyValue(prop);
     }
 
-    opts = merge(defaults, opts);
-
-    /* Elements */
-
-    var body = document.body;
-    var container = element(opts.container)[0];
-    var sections = element(opts.sections);
-    var section = sections[0];
-    var columns = {
-        left: element(opts.columns.left)[0],
-        right: element(opts.columns.right)[0]
-    };
-    var next = element(opts.next)[0];
-    var prev = element(opts.prev)[0];
-    var invertedColumn = 'left';
-    var sectionCount = size(columns[invertedColumn].querySelectorAll(opts.sections));
-    var timer;
-
-    var SCROLL_DIRECTION = null;
-    var IS_ANIMATING = false;
-
-    /* Helpers */
-
     function height(el) {
         for (var i = 0; i < el.length; i++) {
-           return el[i].offsetHeight;
+            return el[i].offsetHeight;
         }
         return el.offsetHeight;
     }
 
     function setHeight(el, height) {
         for (var i = 0; i < el.length; i++) {
-            console.log(el[i], height);
             el[i].style.height = [height, 'px'].join('');
         }
     }
@@ -143,7 +146,6 @@ Columnimate = function(opts) {
         forOwn(obj, function(key, value) {
             el.style[key] = value;
         });
-    console.log(el);
     }
 
     function half(n) {
@@ -156,10 +158,7 @@ Columnimate = function(opts) {
         }, 0);
     }
 
-    /* Applied functions */
-
     function containerHeight() {
-        //return height(container);
         return columnHeight() * sectionCount;
     }
 
@@ -172,20 +171,19 @@ Columnimate = function(opts) {
     }
 
     function boxHeight() {
-        //return columnHeight() / sectionCount;
         return columnHeight();
     }
 
     function scrollNext() {
         var leftVal = -(Math.abs(parseInt(getCssProp(columns[invertedColumn], 'margin-top'), 10)) - boxHeight());
-        var rightVal = -(Math.abs(parseInt(getCssProp(columns['right'], 'margin-top'), 10)) + boxHeight());
+        var rightVal = -(Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) + boxHeight());
         if ( Math.abs(parseInt(getCssProp(columns[invertedColumn], 'margin-top'), 10)) > 0 ) {
             setColumnMarginTop('left', leftVal);
             setColumnMarginTop('right', rightVal);
-            paginationButton(next, 'show')
-            paginationButton(prev, 'show')
+            paginationButton(next, 'show');
+            paginationButton(prev, 'show');
         } else {
-            paginationButton(next, 'hide')
+            paginationButton(next, 'hide');
         }
 
         animateCallback();
@@ -194,27 +192,27 @@ Columnimate = function(opts) {
     function scrollPrev() {
 
         var leftVal = -(Math.abs(parseInt(getCssProp(columns[invertedColumn], 'margin-top'), 10)) + boxHeight());
-        var rightVal = -(Math.abs(parseInt(getCssProp(columns['right'], 'margin-top'), 10)) - boxHeight());
-        if ( Math.abs(parseInt(getCssProp(columns['right'], 'margin-top'), 10)) > 0 ) {
+        var rightVal = -(Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) - boxHeight());
+        if ( Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) > 0 ) {
             setColumnMarginTop('left', leftVal);
             setColumnMarginTop('right', rightVal);
-            paginationButton(next, 'show')
+            paginationButton(next, 'show');
         } else {
-            paginationButton(next, 'hide')
+            paginationButton(next, 'hide');
         }
 
         animateCallback();
     }
 
     function animateCallback() {
-        clearTimeout(this.animateTimeout);
-        this.animateTimeout = setTimeout(function() {
+        var animateTimeout = setTimeout(function() {
+            clearTimeout(animateTimeout);
             removeClass(container, 'columnimate-blur');
             if ( Math.abs(parseInt(getCssProp(columns[invertedColumn], 'margin-top'), 10)) <= 0 ) {
-                paginationButton(next, 'hide')
+                paginationButton(next, 'hide');
             }
-            if ( Math.abs(parseInt(getCssProp(columns['right'], 'margin-top'), 10)) <= 0 ) {
-                paginationButton(prev, 'hide')
+            if ( Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) <= 0 ) {
+                paginationButton(prev, 'hide');
             }
         }, 600);
     }
@@ -225,23 +223,24 @@ Columnimate = function(opts) {
 
     function setColumnMarginTop(column, amount, callback) {
         addClass(container, 'columnimate-blur');
-        console.log([amount, 'px'].join(''));
         return setCss(columns[column], {
             marginTop: [amount, 'px'].join('')
         });
     }
 
-    /* Implementation */
-
     function mouseWheelScroll(event) {
-        if (IS_ANIMATING === true) {
+        if (IS_ANIMATING) {
             event.preventDefault();
             return;
         }
 
         IS_ANIMATING = true;
         SCROLL_DIRECTION = scrollDirection(event.wheelDelta);
-        console.log(SCROLL_DIRECTION);
+        animate();
+    }
+
+    function animate() {
+
         if (SCROLL_DIRECTION === 'down') {
             scrollNext();
         } else {
@@ -249,6 +248,7 @@ Columnimate = function(opts) {
         }
 
         timer = setTimeout(function() {
+            clearTimeout(timer);
             IS_ANIMATING = false;
         }, 2000);
     }
@@ -270,24 +270,73 @@ Columnimate = function(opts) {
         setHeight(columns.right, containerHeight() * sectionCount);
         setHeight(sections, boxHeight());
         setMarginTop(columns[invertedColumn], -Math.abs(columnOffset()));
-        setMarginTop(columns['right'], 0);
+        setMarginTop(columns.right, 0);
         paginationButton(prev, 'hide');
         setTimeout(function() {
             addClass(columns.left, 'columnimate-column');
             addClass(columns.right, 'columnimate-column');
         }, 0);
-        console.log('containerHeight', containerHeight());
-        console.log('columnOffset', columnOffset());
     }
-
-    /* Bindings */
 
     addEvent(window, 'resize', resize);
     addEvent(window, 'mousewheel', mouseWheelScroll);
     addEvent(next, 'click', scrollNext);
     addEvent(prev, 'click', scrollPrev);
 
-    /* Start */
+    swipedetect(container, function(swipeDirection){
+        SCROLL_DIRECTION = swipeDirection;
+        animate();
+    });
 
     init();
-};
+});
+
+/**
+ * @credit http://www.javascriptkit.com/javatutors/touchevents2.shtml
+ */
+function swipedetect(el, callback){
+
+    var touchsurface = el,
+    swipedir,
+    startX,
+    startY,
+    distX,
+    distY,
+    threshold = 150, //required min distance traveled to be considered swipe
+    restraint = 100, // maximum distance allowed at the same time in perpendicular direction
+    allowedTime = 300, // maximum time allowed to travel that distance
+    elapsedTime,
+    startTime,
+    handleswipe = callback || function(swipedir){};
+
+    touchsurface.addEventListener('touchstart', function(e){
+        var touchobj = e.changedTouches[0];
+        swipedir = 'none';
+        dist = 0;
+        startX = touchobj.pageX;
+        startY = touchobj.pageY;
+        startTime = new Date().getTime();
+        e.preventDefault();
+
+    }, false);
+
+    touchsurface.addEventListener('touchmove', function(e){
+        e.preventDefault();
+    }, false);
+
+    touchsurface.addEventListener('touchend', function(e){
+        var touchobj = e.changedTouches[0];
+        distX = touchobj.pageX - startX; // get horizontal dist traveled by finger while in contact with surface
+        distY = touchobj.pageY - startY; // get vertical dist traveled by finger while in contact with surface
+        elapsedTime = new Date().getTime() - startTime; // get time elapsed
+        if (elapsedTime <= allowedTime) { // first condition for awipe met
+            if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
+                swipedir = (distX < 0)? 'left' : 'right'; // if dist traveled is negative, it indicates left swipe
+            } else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint) { // 2nd condition for vertical swipe met
+                swipedir = (distY < 0)? 'up' : 'down'; // if dist traveled is negative, it indicates up swipe
+            }
+        }
+        handleswipe(swipedir);
+        e.preventDefault();
+    }, false);
+}
