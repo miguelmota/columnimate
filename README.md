@@ -1,4 +1,4 @@
-# Columnimate
+# Columnimate v0.0.2
 
 Simple column sliding animation
 

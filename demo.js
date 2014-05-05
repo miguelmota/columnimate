@@ -7,6 +7,7 @@
         },
         sections: '.box',
         next: '.next',
-        prev: '.prev'
+        prev: '.prev',
+        pagination: '.pagination'
     });
 })();

@@ -1,3 +1,10 @@
+/**
+ * @name Columnimate
+ * @author Miguel Mota <hello@miguelmota.com>
+ *
+ * Gotta warn ya; code is ugly at the moment
+ */
+
 Columnimate = (function(opts) {
     'use strict';
 
@@ -7,6 +14,7 @@ Columnimate = (function(opts) {
 
     var defaults = {
         container: '.columnimate-container',
+        containerHeight: null,
         columns: {
             left: '.columnimate-column-left',
             right: '.columnimate-column-right'
@@ -15,24 +23,29 @@ Columnimate = (function(opts) {
         next: '.columnimate-next',
         prev: '.columnimate-previous',
         animate: 'blur',
-        transition: 2000
+        transition: 2000,
+        pagination: '.columnimate-pagination'
     };
 
     /* Elements */
 
     var body = document.body;
-    var container = element(opts.container)[0];
+    var container = element(opts.container);
     var sections = element(opts.sections);
-    var section = sections[0];
+    var section = sections;
     var columns = {
-        left: element(opts.columns.left)[0],
-        right: element(opts.columns.right)[0]
+        left: element(opts.columns.left),
+        right: element(opts.columns.right)
     };
-    var next = element(opts.next)[0];
-    var prev = element(opts.prev)[0];
+    var next = element(opts.next);
+    var prev = element(opts.prev);
+    var pagination = element(opts.pagination);
     var invertedColumn = 'left';
     var sectionCount = size(columns[invertedColumn].querySelectorAll(opts.sections));
     var timer;
+    var scrollPoints;
+    var paginationAttributeName = 'data-columnimate-go-to';
+    var scrollTime = 600;
 
     var SCROLL_DIRECTION = null;
     var IS_ANIMATING = false;
@@ -51,6 +64,18 @@ Columnimate = (function(opts) {
             obj3[attrname] = obj2[attrname];
         }
         return obj3;
+    }
+
+    function existy(x) {
+        return x != null;
+    }
+
+    function truthy(x) {
+        return x !== false;
+    }
+
+    function falsy(x) {
+        return !truthy(x);
     }
 
     function hasClass(elem, className) {
@@ -74,7 +99,8 @@ Columnimate = (function(opts) {
     }
 
     function element(selector) {
-        return document.querySelectorAll(selector);
+        var elements = document.querySelectorAll(selector);
+        return elements.length && elements.length > 1 ? elements : (elements.length ? elements[0] : null);
     }
 
     function forOwn(obj, func) {
@@ -159,7 +185,13 @@ Columnimate = (function(opts) {
     }
 
     function containerHeight() {
-        return columnHeight() * sectionCount;
+        if (typeof opts.containerHeight === 'function') {
+            return opts.containerHeight();
+        } else if (existy(opts.containerHeight)) {
+            return opts.containerHeight;
+        } else {
+            return columnHeight() * sectionCount;
+        }
     }
 
     function columnHeight() {
@@ -174,10 +206,14 @@ Columnimate = (function(opts) {
         return columnHeight();
     }
 
+    function absoluteMarginTop(el) {
+        return Math.abs(parseInt(getCssProp(el, 'margin-top'), 10));
+    }
+
     function scrollNext() {
-        var leftVal = -(Math.abs(parseInt(getCssProp(columns[invertedColumn], 'margin-top'), 10)) - boxHeight());
-        var rightVal = -(Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) + boxHeight());
-        if ( Math.abs(parseInt(getCssProp(columns[invertedColumn], 'margin-top'), 10)) > 0 ) {
+        var leftVal = -(absoluteMarginTop(columns[invertedColumn]) - boxHeight());
+        var rightVal = -(absoluteMarginTop(columns.right) + boxHeight());
+        if (absoluteMarginTop(columns[invertedColumn]) > 0 ) {
             setColumnMarginTop('left', leftVal);
             setColumnMarginTop('right', rightVal);
             paginationButton(next, 'show');
@@ -191,9 +227,9 @@ Columnimate = (function(opts) {
 
     function scrollPrev() {
 
-        var leftVal = -(Math.abs(parseInt(getCssProp(columns[invertedColumn], 'margin-top'), 10)) + boxHeight());
-        var rightVal = -(Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) - boxHeight());
-        if ( Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) > 0 ) {
+        var leftVal = -(absoluteMarginTop(columns[invertedColumn]) + boxHeight());
+        var rightVal = -(absoluteMarginTop(columns.right) - boxHeight());
+        if (absoluteMarginTop(columns.right) > 0 ) {
             setColumnMarginTop('left', leftVal);
             setColumnMarginTop('right', rightVal);
             paginationButton(next, 'show');
@@ -214,7 +250,7 @@ Columnimate = (function(opts) {
             if ( Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) <= 0 ) {
                 paginationButton(prev, 'hide');
             }
-        }, 600);
+        }, scrollTime);
     }
 
     function paginationButton(button, display) {
@@ -265,30 +301,100 @@ Columnimate = (function(opts) {
         init();
     }
 
+    function anchor(i) {
+        var a = document.createElement('a');
+        a.setAttribute(paginationAttributeName, i);
+        a.textContent = i;
+        return a;
+    }
+
+    function paginationLinks() {
+        pagination.innerHTML = '';
+        for (var i = 1; i <= scrollPoints.length; i++) {
+            pagination.appendChild(anchor(i));
+        }
+    }
+
+    function setScrollPoints() {
+        scrollPoints = [];
+        for (var i = 1; i <= sectionCount; i++) {
+            scrollPoints.push(Math.abs(((containerHeight() / sectionCount) * i) - containerHeight()));
+        }
+        scrollPoints.reverse();
+        return scrollPoints;
+    }
+
     function init() {
         setHeight(columns.left, containerHeight() * sectionCount);
         setHeight(columns.right, containerHeight() * sectionCount);
         setHeight(sections, boxHeight());
         setMarginTop(columns[invertedColumn], -Math.abs(columnOffset()));
         setMarginTop(columns.right, 0);
-        paginationButton(prev, 'hide');
+        if (pagination) {
+            paginationButton(prev, 'hide');
+        }
         setTimeout(function() {
             addClass(columns.left, 'columnimate-column');
             addClass(columns.right, 'columnimate-column');
         }, 0);
+        setScrollPoints();
+        paginationLinks();
+    }
+
+    function paginationNavigate(e) {
+        if (e.target.nodeName.toLowerCase() === 'a') {
+            goTo(e.target.getAttribute(paginationAttributeName));
+        }
     }
 
     addEvent(window, 'resize', resize);
     addEvent(window, 'mousewheel', mouseWheelScroll);
-    addEvent(next, 'click', scrollNext);
-    addEvent(prev, 'click', scrollPrev);
+    if (next && prev) {
+        addEvent(next, 'click', scrollNext);
+        addEvent(prev, 'click', scrollPrev);
+    }
+    if (pagination) {
+        addEvent(pagination, 'click', paginationNavigate);
+    }
 
     swipedetect(container, function(swipeDirection){
         SCROLL_DIRECTION = swipeDirection;
         animate();
     });
 
+    function goTo(index) {
+        var currentPosition = absoluteMarginTop(columns.right);
+        var currentIndex = scrollPoints.indexOf(currentPosition);
+        if (scrollPoints[index - 1] > currentPosition) {
+            scrollNext();
+            for (var i = currentIndex; i < index-2; i++) {
+                (function() {
+                    setTimeout(function() {
+                        scrollNext();
+                    }, scrollTime);
+                })();
+            }
+        }
+
+        if (scrollPoints[index - 1] < currentPosition) {
+           scrollPrev();
+            for (var i = index-1; i < currentIndex; i++) {
+                (function() {
+                    setTimeout(function() {
+                        scrollPrev();
+                    }, scrollTime);
+                })();
+            }
+        }
+    }
+
     init();
+
+    return {
+        goTo: goTo,
+        scrollNext: scrollNext,
+        scrollPrev: scrollPrev
+    };
 });
 
 /**
