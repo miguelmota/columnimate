@@ -358,7 +358,7 @@ Columnimate = (function(opts) {
     }
 
     swipedetect(container, function(swipeDirection){
-        SCROLL_DIRECTION = swipeDirection;
+        SCROLL_DIRECTION = (swipeDirection === 'down' ? 'up' : 'down');
         animate();
     });
 
