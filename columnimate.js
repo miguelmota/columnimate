@@ -353,8 +353,6 @@ Columnimate = (function(opts) {
     }
 
     function init() {
-        addClass(columns.left, 'columnimate-column-left');
-        addClass(columns.right, 'columnimate-column-right');
         setHeight(columns.left, containerHeight() * sectionCount);
         setHeight(columns.right, containerHeight() * sectionCount);
         setHeight(sections, boxHeight());
@@ -366,6 +364,8 @@ Columnimate = (function(opts) {
         setTimeout(function() {
             addClass(columns.left, 'columnimate-column');
             addClass(columns.right, 'columnimate-column');
+            addClass(columns.left, 'columnimate-column-left');
+            addClass(columns.right, 'columnimate-column-right');
         }, 0);
         setScrollPoints();
         paginationLinks();
