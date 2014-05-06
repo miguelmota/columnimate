@@ -25,10 +25,13 @@ Columnimate = (function(opts) {
         prev: '.columnimate-previous',
         animate: 'blur',
         transition: 2000,
-        pagination: '.columnimate-pagination'
+        pagination: '.columnimate-pagination',
+        callback: function(){}
     };
 
     /* Elements */
+
+    opts = merge(defaults, opts);
 
     var body = document.body;
     var container = element(opts.container);
@@ -47,11 +50,10 @@ Columnimate = (function(opts) {
     var scrollPoints;
     var paginationAttributeName = 'data-columnimate-go-to';
     var scrollTime = 600;
+    var slideCallback = opts.callback;
 
     var SCROLL_DIRECTION = null;
     var IS_ANIMATING = false;
-
-    opts = merge(defaults, opts);
 
     /* Functions */
 
@@ -225,6 +227,7 @@ Columnimate = (function(opts) {
             setColumnMarginTop('right', rightVal);
             paginationButton(next, 'show');
             paginationButton(prev, 'show');
+            slideCallback(currentIndex());
         } else {
             paginationButton(next, 'hide');
         }
@@ -240,6 +243,7 @@ Columnimate = (function(opts) {
             setColumnMarginTop('left', leftVal);
             setColumnMarginTop('right', rightVal);
             paginationButton(next, 'show');
+            slideCallback(currentIndex());
         } else {
             paginationButton(next, 'hide');
         }
@@ -369,12 +373,18 @@ Columnimate = (function(opts) {
         animate();
     });
 
+    function currentTopPosition() {
+        return absoluteMarginTop(columns.right);
+    }
+
+    function currentIndex() {
+        return scrollPoints.indexOf(currentTopPosition());
+    }
+
     function goTo(index) {
-        var currentPosition = absoluteMarginTop(columns.right);
-        var currentIndex = scrollPoints.indexOf(currentPosition);
-        if (scrollPoints[index - 1] > currentPosition) {
+        if (scrollPoints[index - 1] > currentTopPosition()) {
             scrollNext();
-            for (var i = currentIndex; i < index-2; i++) {
+            for (var i = currentIndex(); i < index-2; i++) {
                 (function() {
                     setTimeout(function() {
                         scrollNext();
@@ -383,9 +393,9 @@ Columnimate = (function(opts) {
             }
         }
 
-        if (scrollPoints[index - 1] < currentPosition) {
+        if (scrollPoints[index - 1] < currentTopPosition()) {
            scrollPrev();
-            for (var i = index-1; i < currentIndex; i++) {
+            for (var i = index-1; i < currentIndex(); i++) {
                 (function() {
                     setTimeout(function() {
                         scrollPrev();

@@ -8,6 +8,9 @@
         sections: '.box',
         next: '.next',
         prev: '.prev',
-        pagination: '.pagination'
+        pagination: '.pagination',
+        callback: function(currentIndex) {
+            console.log(currentIndex);
+        }
     });
 })();
