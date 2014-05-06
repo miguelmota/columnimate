@@ -19,6 +19,7 @@ Columnimate = (function(opts) {
             left: '.columnimate-column-left',
             right: '.columnimate-column-right'
         },
+        columnHeight: null,
         sections: '.columnimate-section',
         next: '.columnimate-next',
         prev: '.columnimate-previous',
@@ -195,7 +196,13 @@ Columnimate = (function(opts) {
     }
 
     function columnHeight() {
-        return height(columns[invertedColumn]);
+        if (typeof opts.columnHeight === 'function') {
+            return opts.columnHeight();
+        } else if (existy(opts.columnHeight)) {
+            return opts.columnHeight;
+        } else {
+            return height(columns[invertedColumn]);
+        }
     }
 
     function columnOffset() {
