@@ -6,10 +6,8 @@
             right: '.column-right'
         },
         sections: '.box',
-        next: '.next',
-        prev: '.prev',
         pagination: '.pagination',
-        callback: function(currentIndex) {
+        callback: function(previousIndex, currentIndex) {
 
         }
     });

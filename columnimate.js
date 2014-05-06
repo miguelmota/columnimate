@@ -49,8 +49,12 @@ Columnimate = (function(opts) {
     var timer;
     var scrollPoints;
     var paginationAttributeName = 'data-columnimate-go-to';
+    var paginationNextAttributeName = 'data-columnimate-next';
+    var paginationPrevAttributeName = 'data-columnimate-prev';
     var scrollTime = 600;
     var slideCallback = opts.callback;
+    var CURRENT_INDEX = 0;
+    var PREV_INDEX = 0;
 
     var SCROLL_DIRECTION = null;
     var IS_ANIMATING = false;
@@ -227,7 +231,7 @@ Columnimate = (function(opts) {
             setColumnMarginTop('right', rightVal);
             paginationButton(next, 'show');
             paginationButton(prev, 'show');
-            slideCallback(currentIndex());
+            PREV_INDEX = currentIndex();
         } else {
             paginationButton(next, 'hide');
         }
@@ -243,7 +247,7 @@ Columnimate = (function(opts) {
             setColumnMarginTop('left', leftVal);
             setColumnMarginTop('right', rightVal);
             paginationButton(next, 'show');
-            slideCallback(currentIndex());
+            PREV_INDEX = currentIndex();
         } else {
             paginationButton(next, 'hide');
         }
@@ -261,11 +265,15 @@ Columnimate = (function(opts) {
             if ( Math.abs(parseInt(getCssProp(columns.right, 'margin-top'), 10)) <= 0 ) {
                 paginationButton(prev, 'hide');
             }
+            CURRENT_INDEX = currentIndex();
+            slideCallback(PREV_INDEX, CURRENT_INDEX);
         }, scrollTime);
     }
 
     function paginationButton(button, display) {
-        button.style.display = (display === 'show') ? 'block' : 'none';
+        if (button) {
+            button.style.display = (display === 'show') ? 'block' : 'none';
+        }
     }
 
     function setColumnMarginTop(column, amount, callback) {
@@ -353,8 +361,14 @@ Columnimate = (function(opts) {
     }
 
     function paginationNavigate(e) {
-        if (e.target.nodeName.toLowerCase() === 'a') {
+        if (e.target.hasAttribute(paginationAttributeName)) {
             goTo(e.target.getAttribute(paginationAttributeName));
+        }
+        if (e.target.hasAttribute(paginationNextAttributeName)) {
+            scrollNext();
+        }
+        if (e.target.hasAttribute(paginationPrevAttributeName)) {
+            scrollPrev();
         }
     }
 
@@ -364,9 +378,7 @@ Columnimate = (function(opts) {
         addEvent(next, 'click', scrollNext);
         addEvent(prev, 'click', scrollPrev);
     }
-    if (pagination) {
-        addEvent(pagination, 'click', paginationNavigate);
-    }
+    addEvent(document, 'click', paginationNavigate);
 
     swipedetect(container, function(swipeDirection){
         SCROLL_DIRECTION = (swipeDirection === 'down' ? 'up' : 'down');
