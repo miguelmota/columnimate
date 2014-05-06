@@ -10,7 +10,7 @@
         prev: '.prev',
         pagination: '.pagination',
         callback: function(currentIndex) {
-            console.log(currentIndex);
+
         }
     });
 })();

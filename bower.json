@@ -1,7 +1,7 @@
 {
   "name": "columnimate",
   "main": "columnimate.js",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "authors": [
     "Miguel Mota <miguelmota2@gmail.com>"
   ],
