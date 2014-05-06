@@ -7,7 +7,10 @@
         },
         sections: '.box',
         pagination: '.pagination',
-        callback: function(previousIndex, currentIndex) {
+        onStart: function(currentIndex) {
+            console.log(currentIndex);
+        },
+        onEnd: function(previousIndex, currentIndex) {
 
         }
     });

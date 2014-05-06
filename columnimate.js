@@ -26,7 +26,8 @@ Columnimate = (function(opts) {
         animate: 'blur',
         transition: 2000,
         pagination: '.columnimate-pagination',
-        callback: function(){}
+        onStart: noop(),
+        onEnd: noop()
     };
 
     /* Elements */
@@ -52,7 +53,8 @@ Columnimate = (function(opts) {
     var paginationNextAttributeName = 'data-columnimate-next';
     var paginationPrevAttributeName = 'data-columnimate-prev';
     var scrollTime = 600;
-    var slideCallback = opts.callback;
+    var slideStartCallback = opts.onStart;
+    var slideEndCallback = opts.onEnd;
     var CURRENT_INDEX = 0;
     var PREV_INDEX = 0;
 
@@ -60,6 +62,10 @@ Columnimate = (function(opts) {
     var IS_ANIMATING = false;
 
     /* Functions */
+
+    function noop() {
+        return function(){};
+    }
 
     function merge(obj1, obj2){
         var obj3 = {},
@@ -232,6 +238,7 @@ Columnimate = (function(opts) {
             paginationButton(next, 'show');
             paginationButton(prev, 'show');
             PREV_INDEX = currentIndex();
+            slideStartCallback(PREV_INDEX);
         } else {
             paginationButton(next, 'hide');
         }
@@ -248,6 +255,7 @@ Columnimate = (function(opts) {
             setColumnMarginTop('right', rightVal);
             paginationButton(next, 'show');
             PREV_INDEX = currentIndex();
+            slideStartCallback(PREV_INDEX);
         } else {
             paginationButton(next, 'hide');
         }
@@ -266,7 +274,7 @@ Columnimate = (function(opts) {
                 paginationButton(prev, 'hide');
             }
             CURRENT_INDEX = currentIndex();
-            slideCallback(PREV_INDEX, CURRENT_INDEX);
+            slideEndCallback(PREV_INDEX, CURRENT_INDEX);
         }, scrollTime);
     }
 
@@ -328,6 +336,7 @@ Columnimate = (function(opts) {
     }
 
     function paginationLinks() {
+        if (!pagination) return;
         pagination.innerHTML = '';
         for (var i = 1; i <= scrollPoints.length; i++) {
             pagination.appendChild(anchor(i));

@@ -36,6 +36,7 @@ bower install columnimate
 </div>
 <a class="next">next</a>
 <a class="prev">prev</a>
+<a class="pagination"></a>
 ```
 
 ```javascript
@@ -47,7 +48,10 @@ var columnimate = new Columnimate({
     },
     sections: '.section',
     next: '.next',
-    prev: '.prev'
+    prev: '.prev',
+    pagination: '.pagination:',
+    onStart: function(currentIndex) {},
+    onEnd: function(previousIndex, currentIndex) {}
 });
 ```
 
