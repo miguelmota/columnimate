@@ -353,6 +353,8 @@ Columnimate = (function(opts) {
     }
 
     function init() {
+        addClass(columns.left, 'columnimate-column-left');
+        addClass(columns.right, 'columnimate-column-right');
         setHeight(columns.left, containerHeight() * sectionCount);
         setHeight(columns.right, containerHeight() * sectionCount);
         setHeight(sections, boxHeight());

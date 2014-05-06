@@ -14,10 +14,12 @@
 
 .columnimate-column-left {
     float: left;
+    width: 50%;
 }
 
 .columnimate-column-right {
     float: right;
+    width: 50%;
 }
 
 .columnimate-blur {
