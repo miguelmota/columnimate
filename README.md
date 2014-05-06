@@ -36,7 +36,7 @@ bower install columnimate
 </div>
 <a class="next">next</a>
 <a class="prev">prev</a>
-<a class="pagination"></a>
+<div class="pagination"></div>
 ```
 
 ```javascript
